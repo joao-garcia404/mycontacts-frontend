@@ -3,15 +3,20 @@ import editIcon from '../../assets/images/icons/edit.svg';
 import trashIcon from '../../assets/images/icons/trash.svg';
 
 import {
-  Card,
   Container,
+  InputSearchContainer,
+  Card,
   Header,
   ListContainer,
 } from './styles';
 
-export default function ContactsList() {
+export default function Home() {
   return (
     <Container>
+      <InputSearchContainer>
+        <input type="text" placeholder="Pesquise pelo nome" />
+      </InputSearchContainer>
+
       <Header>
         <strong>3 contatos</strong>
 
