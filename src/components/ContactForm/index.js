@@ -1,4 +1,5 @@
-import { useState } from 'react';
+/* eslint-disable no-empty */
+import { useEffect, useState } from 'react';
 
 import PropTypes from 'prop-types';
 
@@ -9,6 +10,8 @@ import Input from '../Input';
 import Select from '../Select';
 import Button from '../Button';
 
+import CategoriesService from '../../services/CategoriesService';
+
 import isEmailValid from '../../utils/isEmailValid';
 import formatPhone from '../../utils/formatPhone';
 
@@ -18,7 +21,9 @@ export default function ContactForm({ buttonLabel }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [category, setCategory] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+
+  const [categories, setCategories] = useState([]);
 
   const {
     errors, setError, removeError, getErrorMessageByFieldName,
@@ -33,7 +38,7 @@ export default function ContactForm({ buttonLabel }) {
       name,
       email,
       phone: phone.replace(/\D/g, ''),
-      category,
+      category: categoryId,
     });
   }
 
@@ -60,6 +65,18 @@ export default function ContactForm({ buttonLabel }) {
   function handlePhoneChange(event) {
     setPhone(formatPhone(event.target.value));
   }
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const categoriesList = await CategoriesService.listCategories();
+
+        setCategories(categoriesList);
+      } catch (error) {}
+    }
+
+    loadCategories();
+  }, []);
 
   return (
     <Form onSubmit={handleSubmit} noValidate>
@@ -93,12 +110,13 @@ export default function ContactForm({ buttonLabel }) {
 
       <FormGroup>
         <Select
-          value={category}
-          onChange={(event) => setCategory(event.target.value)}
+          value={categoryId}
+          onChange={(event) => setCategoryId(event.target.value)}
         >
           <option value="">Categoria</option>
-          <option value="instagram">Instagram</option>
-          <option value="discord">Discord</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>{category.name}</option>
+          ))}
         </Select>
       </FormGroup>
 
