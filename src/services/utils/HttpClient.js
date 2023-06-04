@@ -1,28 +1,60 @@
 import APIError from '../../errors/ApiError';
-import delay from '../../utils/delay';
 
 class HttpClient {
   constructor(baseURL) {
     this.baseURL = baseURL;
   }
 
-  async get(path) {
-    await delay(500);
+  get(path, options) {
+    return this.makeRequest(path, {
+      method: 'GET',
+      headers: options?.headers,
+    });
+  }
 
-    const response = await fetch(`${this.baseURL}${path}`);
+  post(path, options) {
+    return this.makeRequest(
+      path,
+      {
+        method: 'POST',
+        body: options?.body,
+        headers: options?.headers,
+      },
+    );
+  }
+
+  async makeRequest(path, options) {
+    const headers = new Headers();
+
+    if (options.body) {
+      headers.append('Content-Type', 'application/json');
+    }
+
+    if (options?.headers) {
+      Object.entries(options.headers).forEach(([key, value]) => {
+        headers.append(key, value);
+      });
+    }
+
+    const response = await fetch(`${this.baseURL}${path}`, {
+      method: options.method,
+      body: JSON.stringify(options.body),
+      headers,
+    });
+
     const contentType = response.headers.get('Content-Type');
 
-    let body = null;
+    let responseBody = null;
 
     if (contentType.includes('application/json')) {
-      body = await response.json();
+      responseBody = await response.json();
     }
 
     if (response.ok) {
-      return body;
+      return responseBody;
     }
 
-    throw new APIError(response, body);
+    throw new APIError(response, responseBody);
   }
 }
 
